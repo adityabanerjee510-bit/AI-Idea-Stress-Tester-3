@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Login | AI Startup War Simulator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+        background: #0a0f1a;
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+      }
+
+      #canvas-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        display: block;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(0, 40, 50, 0.3) 0%,
+          rgba(5, 15, 25, 0.85) 100%
+        );
+        z-index: -1;
+      }
+
+      /* Main Layout - Split Screen Design */
+      .auth-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* Left Side - Premium Realistic Design */
+      .brand-section {
+        flex: 0 0 calc(50% - 20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(10, 25, 30, 0.85) 0%,
+          rgba(5, 18, 22, 0.95) 100%
+        );
+        backdrop-filter: blur(15px);
+        border-right: 1px solid rgba(72, 187, 120, 0.5);
+        overflow: hidden;
+      }
+
+      /* Animated gradient orbs */
+      .brand-section::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -20%;
+        width: 80%;
+        height: 150%;
+        background: radial-gradient(
+          circle,
+          rgba(72, 187, 120, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: floatOrb 20s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .brand-section::after {
+        content: "";
+        position: absolute;
+        bottom: -30%;
+        right: -10%;
+        width: 60%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          rgba(56, 178, 172, 0.12) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: floatOrb 15s ease-in-out infinite reverse;
+        pointer-events: none;
+      }
+
+      @keyframes floatOrb {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(5%, 3%) scale(1.05);
+        }
+        66% {
+          transform: translate(-3%, 5%) scale(0.98);
+        }
+      }
+
+      /* Glowing grid overlay */
+      .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image:
+          linear-gradient(rgba(72, 187, 120, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(72, 187, 120, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+      }
+
+      .brand-content {
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+        padding: 2.5rem 3rem;
+      }
+
+      /* Premium Logo */
+      .brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 3rem;
+        position: relative;
+      }
+
+      .logo-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          rgba(72, 187, 120, 0.2),
+          rgba(56, 178, 172, 0.1)
+        );
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(72, 187, 120, 0.4);
+        backdrop-filter: blur(5px);
+      }
+
+      .brand-logo i {
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .brand-logo span {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.5px;
+      }
+
+      /* Welcome Message */
+      .welcome-text {
+        margin-bottom: 2rem;
+      }
+
+      .brand-title {
+        font-size: 3.2rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #ffffff, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -1px;
+        text-shadow: 0 0 30px rgba(72, 187, 120, 0.3);
+      }
+
+      .brand-subtitle {
+        color: #94a3b8;
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      /* Stats Cards - Premium Look */
+      .stats-container {
+        display: flex;
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+        padding: 0;
+      }
+
+      .stat-item {
+        flex: 1;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1.2rem 0.8rem;
+        border: 1px solid rgba(72, 187, 120, 0.25);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(72, 187, 120, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .stat-item:hover::before {
+        left: 100%;
+      }
+
+      .stat-item:hover {
+        transform: translateY(-5px);
+        border-color: rgba(72, 187, 120, 0.5);
+        box-shadow: 0 10px 30px rgba(72, 187, 120, 0.15);
+      }
+
+      .stat-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      /* Quote Section */
+      .quote-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(72, 187, 120, 0.05);
+        border-left: 3px solid #48bb78;
+        border-radius: 12px;
+      }
+
+      .quote-text {
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        font-style: italic;
+        margin-bottom: 0.8rem;
+      }
+
+      .quote-author {
+        color: #48bb78;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      /* Decorative elements */
+      .glow-dot {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #48bb78;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #48bb78;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.5;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+      }
+
+      /* Right Side - Form Section - Premium */
+      .form-section {
+        flex: 0 0 calc(50% + 20px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        overflow: hidden;
+      }
+
+      .auth-card {
+        background: rgba(15, 35, 35, 0.75);
+        backdrop-filter: blur(20px);
+        border-radius: 32px;
+        padding: 2.2rem;
+        width: 100%;
+        max-width: 520px;
+        border: 1px solid rgba(72, 187, 120, 0.4);
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s ease;
+      }
+
+      .auth-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .auth-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 0.5rem;
+      }
+
+      .auth-header p {
+        color: #a0aec0;
+        font-size: 0.9rem;
+      }
+
+      /* Form Styles */
+      .input-group {
+        margin-bottom: 1.2rem;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #cbd5e0;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-wrapper i {
+        position: absolute;
+        left: 1rem;
+        color: #48bb78;
+        font-size: 1rem;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.9rem 1rem 0.9rem 2.5rem;
+        background: rgba(30, 50, 55, 0.9);
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        border-radius: 14px;
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      .input-group input:focus {
+        border-color: #48bb78;
+        box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        background: rgba(30, 50, 55, 1);
+      }
+
+      /* Checkbox and Forgot Password */
+      .checkbox-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.8rem;
+      }
+
+      .checkbox-group label {
+        color: #a0aec0;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .checkbox-group input {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #48bb78;
+      }
+
+      .forgot-link {
+        color: #48bb78;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .forgot-link:hover {
+        text-decoration: underline;
+        color: #38b2ac;
+      }
+
+      /* Login Button */
+      .auth-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        border: none;
+        border-radius: 14px;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.6s,
+          height 0.6s;
+      }
+
+      .auth-btn:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .auth-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+      }
+
+      /* Social Login */
+      .social-login {
+        margin-top: 2rem;
+        text-align: center;
+      }
+
+      .social-login p {
+        color: #a0aec0;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        position: relative;
+      }
+
+      .social-login p::before,
+      .social-login p::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 35%;
+        height: 1px;
+        background: rgba(72, 187, 120, 0.3);
+      }
+
+      .social-login p::before {
+        left: 0;
+      }
+
+      .social-login p::after {
+        right: 0;
+      }
+
+      .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .social-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: rgba(72, 187, 120, 0.1);
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #48bb78;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .social-icon:hover {
+        background: rgba(72, 187, 120, 0.2);
+        transform: translateY(-3px);
+        border-color: #48bb78;
+      }
+
+      /* Footer */
+      .auth-footer {
+        text-align: center;
+        margin-top: 1.8rem;
+        color: #a0aec0;
+        font-size: 0.85rem;
+      }
+
+      .auth-footer a {
+        color: #48bb78;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .auth-footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* Messages */
+      .error-message,
+      .success-message {
+        border-radius: 12px;
+        padding: 0.75rem;
+        margin-bottom: 1.2rem;
+        font-size: 0.85rem;
+        display: none;
+        text-align: center;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .error-message {
+        background: rgba(220, 38, 38, 0.2);
+        border: 1px solid #ef4444;
+        color: #f87171;
+      }
+
+      .success-message {
+        background: rgba(72, 187, 120, 0.2);
+        border: 1px solid #48bb78;
+        color: #48bb78;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 968px) {
+        .brand-section {
+          flex: 0 0 0;
+          display: none;
+        }
+
+        .form-section {
+          flex: 1;
+          padding: 1rem;
+        }
+
+        .auth-card {
+          max-width: 500px;
+        }
+      }
+
+      @media (max-height: 750px) {
+        .brand-content {
+          padding: 1.5rem 2rem;
+        }
+
+        .brand-logo {
+          margin-bottom: 1.5rem;
+        }
+
+        .brand-title {
+          font-size: 2.5rem;
+        }
+
+        .stats-container {
+          margin: 1.5rem 0;
+        }
+
+        .stat-number {
+          font-size: 1.6rem;
+        }
+
+        .quote-section {
+          margin-top: 1rem;
+          padding: 1rem;
+        }
+
+        .auth-card {
+          padding: 1.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas-bg"></canvas>
+    <div class="bg-overlay"></div>
+
+    <div class="auth-container">
+      <!-- Left Side - Premium Realistic Design -->
+      <div class="brand-section">
+        <div class="grid-overlay"></div>
+        <div class="brand-content">
+          <div class="brand-logo">
+            <div class="logo-icon-wrapper">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <span>WAR·SIM</span>
+          </div>
+
+          <div class="welcome-text">
+            <h1 class="brand-title">Welcome<br />Back Commander</h1>
+            <p class="brand-subtitle">Ready to continue your mission?</p>
+          </div>
+
+          <div class="stats-container">
+            <div class="stat-item">
+              <div class="stat-number">10K+</div>
+              <div class="stat-label">ACTIVE USERS</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">500+</div>
+              <div class="stat-label">WAR ROOMS</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">94%</div>
+              <div class="stat-label">SUCCESS RATE</div>
+            </div>
+          </div>
+
+          <div class="quote-section">
+            <div class="quote-text">
+              "The war room simulations helped us identify market gaps we never
+              saw coming. Game changer for our startup."
+            </div>
+            <div class="quote-author">— Sarah Chen, Founder of TechFlow</div>
+          </div>
+        </div>
+
+        <!-- Decorative glowing dots -->
+        <div class="glow-dot" style="top: 20%; left: 15%"></div>
+        <div
+          class="glow-dot"
+          style="top: 70%; left: 85%; animation-delay: 1s"
+        ></div>
+        <div
+          class="glow-dot"
+          style="top: 40%; left: 10%; animation-delay: 0.5s"
+        ></div>
+        <div
+          class="glow-dot"
+          style="top: 85%; left: 25%; animation-delay: 1.5s"
+        ></div>
+      </div>
+
+      <!-- Right Side - Form Section -->
+      <div class="form-section">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>Sign In</h2>
+            <p>Access your war room dashboard</p>
+          </div>
+
+          <div id="errorMsg" class="error-message"></div>
+          <div id="successMsg" class="success-message"></div>
+
+          <form id="loginForm">
+            <div class="input-group">
+              <label>Email Address</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="loginEmail"
+                  placeholder="hello@example.com"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="loginPassword"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                />
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" id="rememberMe" /> Remember me
+              </label>
+              <a href="#" class="forgot-link" id="forgotPassword"
+                >Forgot Password?</a
+              >
+            </div>
+
+            <button type="submit" class="auth-btn">Sign In →</button>
+          </form>
+
+          <div class="social-login">
+            <p>Or continue with</p>
+            <div class="social-icons">
+              <div class="social-icon" data-provider="google">
+                <i class="fab fa-google"></i>
+              </div>
+              <div class="social-icon" data-provider="github">
+                <i class="fab fa-github"></i>
+              </div>
+              <div class="social-icon" data-provider="linkedin">
+                <i class="fab fa-linkedin-in"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-footer">
+            Don't have an account? <a href="Signup.html">Create Account</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // BACKGROUND
+      const canvas = document.getElementById("canvas-bg");
+      const ctx = canvas.getContext("2d");
+      let width, height;
+      let particles = [];
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+
+      function initParticles() {
+        particles = [];
+        let count = Math.min(80, Math.floor((width * height) / 10000));
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.2,
+            vy: (Math.random() - 0.5) * 0.15,
+            size: Math.random() * 1.8 + 0.8,
+            color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`,
+          });
+        }
+      }
+
+      function animateBackground() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < -20) p.x = width + 20;
+          if (p.x > width + 20) p.x = -20;
+          if (p.y < -20) p.y = height + 20;
+          if (p.y > height + 20) p.y = -20;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animateBackground);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      animateBackground();
+
+      // LOGIN
+      const loginForm = document.getElementById("loginForm");
+      const errorDiv = document.getElementById("errorMsg");
+      const successDiv = document.getElementById("successMsg");
+
+      // const BASE_URL = "http://127.0.0.1:8000";
+
+      function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = "block";
+        successDiv.style.display = "none";
+      }
+
+      function showSuccess(msg) {
+        successDiv.textContent = msg;
+        successDiv.style.display = "block";
+        errorDiv.style.display = "none";
+      }
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const rememberMe = document.getElementById("rememberMe").checked;
+
+        if (!email || !password) {
+          showError("Enter email and password");
+          return;
+        }
+
+        const id = email.split("@")[0] + "_" + password;
+
+        try {
+          const res = await fetch(`${BASE_URL}/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: id,
+              Password: password,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.detail || "Login failed");
+          }
+
+          showSuccess("Login success");
+
+          const userData = { id, email };
+
+          if (rememberMe) {
+            localStorage.setItem("currentUser", JSON.stringify(userData));
+          } else {
+            sessionStorage.setItem("currentUser", JSON.stringify(userData));
+          }
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1200);
+        } catch (err) {
+          showError(err.message);
+        }
+      });
+
+      // EXTRA
+      document.querySelectorAll(".social-icon").forEach((icon) => {
+        icon.addEventListener("click", () => {
+          showError("Social login not available");
+        });
+      });
+
+      document
+        .getElementById("forgotPassword")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          showError("Password reset coming soon");
+        });
+    </script>
+  </body>
+</html>

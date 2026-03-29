@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>War Simulator | AI Startup War Simulator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        overflow-x: hidden;
+        background: #0a0f1a;
+        color: #eef5ff;
+      }
+
+      #canvas-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        display: block;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(0, 40, 50, 0.3) 0%,
+          rgba(5, 15, 25, 0.85) 100%
+        );
+        z-index: -1;
+      }
+
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        backdrop-filter: blur(20px);
+        background: rgba(8, 20, 28, 0.8);
+        border-bottom: 1px solid rgba(72, 187, 120, 0.4);
+        padding: 1rem 0;
+      }
+
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .logo-icon {
+        font-size: 2rem;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 2px #48bb78);
+        }
+        50% {
+          filter: drop-shadow(0 0 10px #48bb78);
+        }
+      }
+
+      .logo-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: #cbd5e0;
+        transition: 0.3s;
+        font-weight: 500;
+      }
+
+      .nav-links a:hover {
+        color: #48bb78;
+      }
+
+      .btn-dashboard {
+        background: rgba(72, 187, 120, 0.2);
+        border: 1px solid rgba(72, 187, 120, 0.5);
+        padding: 0.6rem 1.5rem;
+        border-radius: 40px;
+        color: #48bb78 !important;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .user-name {
+        color: #48bb78;
+        font-weight: 500;
+      }
+
+      .logout-btn {
+        background: rgba(72, 187, 120, 0.2);
+        border: 1px solid rgba(72, 187, 120, 0.5);
+        padding: 0.5rem 1.2rem;
+        border-radius: 40px;
+        color: #48bb78;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .simulator-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 7rem 2rem 3rem;
+      }
+
+      .hero-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.6s ease;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero-section h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 0.5rem;
+      }
+
+      .hero-section p {
+        color: #a0aec0;
+      }
+
+      .input-card {
+        background: rgba(15, 35, 35, 0.5);
+        backdrop-filter: blur(16px);
+        border-radius: 32px;
+        padding: 2rem;
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .idea-input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(30, 50, 55, 0.8);
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        border-radius: 16px;
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        font-family: "Inter", sans-serif;
+        resize: vertical;
+        transition: 0.3s;
+      }
+
+      .idea-input:focus {
+        outline: none;
+        border-color: #48bb78;
+        box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
+      }
+
+      .btn-war {
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 16px;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+      }
+
+      .btn-war:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+      }
+
+      .btn-war:active {
+        transform: translateY(0);
+      }
+
+      .loading {
+        text-align: center;
+        padding: 3rem;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(72, 187, 120, 0.3);
+        border-top-color: #48bb78;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .result-card {
+        background: rgba(15, 35, 35, 0.5);
+        backdrop-filter: blur(16px);
+        border-radius: 32px;
+        padding: 2rem;
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .score-header {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(72, 187, 120, 0.2);
+      }
+
+      .score-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          rgba(72, 187, 120, 0.2),
+          rgba(56, 178, 172, 0.1)
+        );
+        border: 3px solid #48bb78;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        animation: pulseCircle 1s ease;
+      }
+
+      @keyframes pulseCircle {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .score-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #48bb78;
+      }
+
+      .score-label {
+        font-size: 0.9rem;
+        color: #a0aec0;
+      }
+
+      .result-section {
+        margin-bottom: 1.5rem;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+        transition: 0.3s;
+      }
+
+      .result-section:hover {
+        background: rgba(0, 0, 0, 0.4);
+        transform: translateX(5px);
+      }
+
+      .result-section h3 {
+        color: #48bb78;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .result-section p {
+        color: #cbd5e0;
+        line-height: 1.6;
+      }
+
+      .attack-list {
+        list-style: none;
+      }
+
+      .attack-list li {
+        padding: 0.6rem 0;
+        border-left: 3px solid #48bb78;
+        padding-left: 1rem;
+        margin-bottom: 0.5rem;
+        color: #cbd5e0;
+      }
+
+      .back-btn {
+        background: rgba(72, 187, 120, 0.2);
+        border: 1px solid rgba(72, 187, 120, 0.5);
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        color: #48bb78;
+        cursor: pointer;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .back-btn:hover {
+        background: rgba(72, 187, 120, 0.3);
+      }
+
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+        .simulator-container {
+          padding: 6rem 1rem 2rem;
+        }
+        .hero-section h1 {
+          font-size: 1.8rem;
+        }
+        .score-circle {
+          width: 100px;
+          height: 100px;
+        }
+        .score-number {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas-bg"></canvas>
+    <div class="bg-overlay"></div>
+
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo" onclick="window.location.href = 'dashboard.html'">
+          <i class="fas fa-microchip logo-icon"></i>
+          <span class="logo-text">WAR·SIM</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html" class="btn-dashboard">Dashboard</a>
+          <a href="simulator.html" style="color: #48bb78">War Simulator</a>
+        </div>
+        <div class="user-menu">
+          <span class="user-name" id="userNameDisplay"></span>
+          <button class="logout-btn" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="simulator-container">
+      <div class="hero-section">
+        <h1>
+          <i class="fas fa-skull-crossbones"></i> AI Startup War Simulator
+        </h1>
+        <p>
+          Stress-test your startup idea against predators, market gravity, and
+          ruthless failure loops
+        </p>
+      </div>
+
+      <div class="input-card">
+        <label
+          style="
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #48bb78;
+            font-weight: 500;
+          "
+          >Enter Your Startup Idea</label
+        >
+        <textarea
+          class="idea-input"
+          id="ideaInput"
+          rows="3"
+          placeholder="Describe your startup idea in detail...&#10;&#10;Example: An AI-powered platform that helps small businesses automate their customer service using natural language processing, with a subscription model starting at $49/month."
+        ></textarea>
+        <button class="btn-war" id="runTestBtn">
+          <i class="fas fa-play"></i> Launch Stress Test
+        </button>
+      </div>
+
+      <div id="loadingSection" style="display: none">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>🧠 Analyzing your idea...</p>
+          <p style="font-size: 0.9rem; margin-top: 0.5rem">
+            AI engines are stress-testing from all angles
+          </p>
+        </div>
+      </div>
+
+      <div id="resultSection" style="display: none"></div>
+    </div>
+
+    <script>
+      // 3D Background Animation
+      const canvas = document.getElementById("canvas-bg");
+      const ctx = canvas.getContext("2d");
+      let width, height;
+      let particles = [];
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+
+      function initParticles() {
+        particles = [];
+        let count = Math.min(150, Math.floor((width * height) / 6000));
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.3,
+            size: Math.random() * 2.5 + 1,
+            color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`,
+          });
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < -50) p.x = width + 50;
+          if (p.x > width + 50) p.x = -50;
+          if (p.y < -50) p.y = height + 50;
+          if (p.y > height + 50) p.y = -50;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      animate();
+
+      // User Authentication
+      let currentUser = null;
+
+      function loadUser() {
+        const userData = localStorage.getItem("currentUser");
+        if (!userData) {
+          window.location.href = "login.html";
+          return false;
+        }
+        currentUser = JSON.parse(userData);
+        document.getElementById("userNameDisplay").textContent =
+          currentUser.name;
+        return true;
+      }
+
+      // Display Results
+      function displayResults(results, idea) {
+        const resultDiv = document.getElementById("resultSection");
+
+        resultDiv.innerHTML = `
+      <div class="result-card">
+        <div class="score-header">
+          <div class="score-circle">
+            <div>
+              <div class="score-number">${results.score}%</div>
+              <div class="score-label">Success Probability</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <h3>AI Attack Engine</h3>
+          ${results.attacks.map((a) => `<p>${a}</p>`).join("")}
+        </div>
+
+        <div class="result-section">
+          <h3>AI Jury</h3>
+          ${results.jury.map((j) => `<p>${j}</p>`).join("")}
+        </div>
+
+        <div class="result-section">
+          <h3>Timeline</h3>
+          ${results.timeline.map((t) => `<p>${t}</p>`).join("")}
+        </div>
+
+        <div class="result-section">
+          <h3>Survival</h3>
+          <p>${results.survival}</p>
+        </div>
+      </div>
+    `;
+
+        resultDiv.style.display = "block";
+      }
+
+      // MAIN EVENT LISTENER (IMPORTANT PART)
+      document
+        .getElementById("runTestBtn")
+        .addEventListener("click", async () => {
+          const idea = document.getElementById("ideaInput").value.trim();
+
+          if (!idea) {
+            alert("Please enter your startup idea first!");
+            return;
+          }
+
+          document.getElementById("loadingSection").style.display = "block";
+          document.getElementById("resultSection").style.display = "none";
+
+          try {
+            const response = await fetch("http://127.0.0.1:8000/analyze", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ idea: idea }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Server error");
+            }
+
+            const data = await response.json();
+
+            const results = {
+              score: Math.floor(Math.random() * 40 + 60),
+              attacks: (data.attack_analysis || "").split("\n").slice(0, 3),
+              timeline: (data.risk_analysis || "").split("\n").slice(0, 3),
+              jury: (data.final_result || "").split("\n").slice(0, 4),
+              survival: data.final_result || "No data",
+              pitch: "AI Generated Improvement",
+            };
+
+            displayResults(results, idea);
+          } catch (error) {
+            console.error(error);
+            alert("⚠️ Backend error! Make sure FastAPI is running.");
+          }
+
+          document.getElementById("loadingSection").style.display = "none";
+        });
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      });
+
+      // On Load
+      window.addEventListener("load", () => {
+        if (loadUser()) {
+          document.getElementById("ideaInput").value =
+            "AI-powered platform for automating freelance workflows";
+        }
+      });
+    </script>
+  </body>
+</html>

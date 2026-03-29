@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | AI Startup War Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #0a0f1a;
+            min-height: 100vh;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            display: block;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0,40,50,0.3) 0%, rgba(5,15,25,0.85) 100%);
+            z-index: -1;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(8, 20, 28, 0.7);
+            border-bottom: 1px solid rgba(72, 187, 120, 0.4);
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem;
+        }
+
+        .auth-card {
+            background: rgba(15, 35, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid rgba(72, 187, 120, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h2 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(30, 50, 55, 0.8);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #48bb78;
+            box-shadow: 0 0 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .terms-group {
+            margin: 1.5rem 0;
+        }
+
+        .terms-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #a0aec0;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .terms-group input {
+            width: auto;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #a0aec0;
+        }
+
+        .auth-footer a {
+            color: #48bb78;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .social-login {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .social-login p {
+            color: #a0aec0;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .social-login p::before,
+        .social-login p::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: rgba(72, 187, 120, 0.3);
+        }
+
+        .social-login p::before {
+            left: 0;
+        }
+
+        .social-login p::after {
+            right: 0;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            font-size: 1.2rem;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .social-icon:hover {
+            background: rgba(72, 187, 120, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid #ef4444;
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            color: #f87171;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(72, 187, 120, 0.2);
+            border: 1px solid #48bb78;
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            color: #48bb78;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 1.8rem;
+            }
+            .input-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="bg-overlay"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fas fa-microchip logo-icon"></i>
+            <span class="logo-text">WAR·SIM</span>
+        </div>
+    </div>
+</nav>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join the war room and stress-test your ideas</p>
+        </div>
+        
+        <div id="errorMsg" class="error-message"></div>
+        <div id="successMsg" class="success-message"></div>
+        
+        <form id="signupForm">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="John" required>
+                </div>
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" placeholder="Doe" required>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="hello@example.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Create a strong password" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+            </div>
+            
+            <div class="terms-group">
+                <label>
+                    <input type="checkbox" id="termsCheckbox"> I agree to the <a href="#" style="color:#48bb78;">Terms of Service</a> and <a href="#" style="color:#48bb78;">Privacy Policy</a>
+                </label>
+            </div>
+            
+            <button type="submit" class="auth-btn">Create Account →</button>
+        </form>
+        
+        <div class="social-login">
+            <p>Or sign up with</p>
+            <div class="social-icons">
+                <div class="social-icon"><i class="fab fa-google"></i></div>
+                <div class="social-icon"><i class="fab fa-github"></i></div>
+                <div class="social-icon"><i class="fab fa-linkedin-in"></i></div>
+            </div>
+        </div>
+        
+        <div class="auth-footer">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 3D Background Animation
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let time = 0;
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+    }
+
+    function initParticles() {
+        particles = [];
+        let count = Math.min(120, Math.floor(width * height / 8000));
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.2,
+                size: Math.random() * 2 + 1,
+                color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`
+            });
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < -20) p.x = width + 20;
+            if (p.x > width + 20) p.x = -20;
+            if (p.y < -20) p.y = height + 20;
+            if (p.y > height + 20) p.y = -20;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+        
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                let dx = particles[i].x - particles[j].x;
+                let dy = particles[i].y - particles[j].y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < 100) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(72, 187, 120, ${0.12 * (1 - dist/100)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+
+    // Signup Form Handler
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const termsChecked = document.getElementById('termsCheckbox').checked;
+        
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        
+        if (!firstName || !lastName || !email || !password) {
+            errorMsg.textContent = 'Please fill in all fields';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            errorMsg.textContent = 'Passwords do not match';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (password.length < 6) {
+            errorMsg.textContent = 'Password must be at least 6 characters';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (!termsChecked) {
+            errorMsg.textContent = 'Please agree to the Terms of Service';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        // Check if user already exists
+        const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        if (existingUsers.find(u => u.email === email)) {
+            errorMsg.textContent = 'Email already registered. Please login instead.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        // Create new user
+        const newUser = {
+            id: Date.now(),
+            firstName: firstName,
+            lastName: lastName,
+            name: firstName + ' ' + lastName,
+            email: email,
+            password: password,
+            company: '',
+            createdAt: new Date().toISOString(),
+            reports: []
+        };
+        
+        existingUsers.push(newUser);
+        localStorage.setItem('users', JSON.stringify(existingUsers));
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        
+        successMsg.textContent = 'Account created successfully! Redirecting to dashboard...';
+        successMsg.style.display = 'block';
+        
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1500);
+    });
+</script>
+</body>
+</html>

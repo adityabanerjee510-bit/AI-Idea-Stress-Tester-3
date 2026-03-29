@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Startup War Simulator | Neural Stress-Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #0a0f1a;
+            color: #eef5ff;
+        }
+
+        /* 3D Canvas Background */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            display: block;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0,40,50,0.3) 0%, rgba(5,15,25,0.85) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(8, 20, 28, 0.7);
+            border-bottom: 1px solid rgba(72, 187, 120, 0.4);
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #cbd5e0;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #48bb78;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: linear-gradient(90deg, #48bb78, #38b2ac);
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-nav {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            color: white !important;
+        }
+
+        .btn-nav::after {
+            display: none;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-left h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-left p {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 2rem;
+            color: #48bb78;
+        }
+
+        .stat-item p {
+            font-size: 0.9rem;
+            color: #718096;
+            margin: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #48bb78;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            color: #48bb78;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-left: 1rem;
+        }
+
+        .btn-outline:hover {
+            background: rgba(72, 187, 120, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .hero-right {
+            background: rgba(72, 187, 120, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 2rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .testimonial {
+            font-style: italic;
+            color: #cbd5e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .section-header p {
+            color: #a0aec0;
+        }
+
+        .features-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(72, 187, 120, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(72, 187, 120, 0.2);
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(72, 187, 120, 0.5);
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #48bb78;
+        }
+
+        .feature-card p {
+            color: #a0aec0;
+            line-height: 1.5;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(56, 178, 172, 0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 3rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .cta h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: #a0aec0;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(72, 187, 120, 0.2);
+            text-align: center;
+            color: #718096;
+        }
+
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .stats {
+                justify-content: center;
+            }
+            .hero-left h1 {
+                font-size: 2.5rem;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="bg-overlay"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-microchip logo-icon"></i>
+            <span class="logo-text">WAR·SIM</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="simulator.html">Simulator</a>
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="Login.html" class="btn-nav">Sign In</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-left">
+            <h1>AI Startup War Simulator</h1>
+            <p>Stress-test your startup idea against predators, market gravity, and ruthless failure loops. Uncover hidden vulnerabilities and transform fragility into resilience.</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <h3>94%</h3>
+                    <p>Accuracy Rate</p>
+                </div>
+                <div class="stat-item">
+                    <h3>10K+</h3>
+                    <p>Ideas Tested</p>
+                </div>
+                <div class="stat-item">
+                    <h3>3.2K</h3>
+                    <p>Successful Pivots</p>
+                </div>
+            </div>
+            <div>
+                <button class="btn-primary" onclick="window.location.href='Login.html'">
+                    <i class="fas fa-play"></i> Start Free Trial
+                </button>
+                <button class="btn-outline" onclick="window.location.href='#features'">
+                    Learn More
+                </button>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="testimonial">
+                <i class="fas fa-quote-left" style="color: #48bb78; margin-right: 10px;"></i>
+                "This simulator saved our startup from a disastrous launch. The AI attack engine exposed vulnerabilities we never considered."
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <strong>Sarah Chen</strong><br>
+                    <small>Founder, TechFlow AI</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="section-header">
+        <h2>Why Choose WAR·SIM?</h2>
+        <p>Comprehensive startup validation system trusted by founders worldwide</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🐉</div>
+            <h3>AI Attack Engine</h3>
+            <p>Multi-stakeholder simulation exposing vulnerabilities in pricing, security, and scalability.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⏳</div>
+            <h3>Failure Timeline</h3>
+            <p>Predicts adoption death, runway crises, and disruption scenarios before they happen.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚖️</div>
+            <h3>AI Jury Panel</h3>
+            <p>Investor, Engineer, Customer & Critic deliver brutal, balanced verdicts.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Blind Spot Detector</h3>
+            <p>Identifies over-optimism, ignored costs, and false demand assumptions.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Success Score</h3>
+            <p>Dynamic scoring based on market demand, feasibility, and competition heat.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">✍️</div>
+            <h3>Auto Pitch Fixer</h3>
+            <p>Refines raw ideas into battle-ready pitch deck narratives.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="cta-content">
+        <h2>Ready to Stress-Test Your Idea?</h2>
+        <p>Join thousands of founders who validated their concepts with brutal honesty.</p>
+        <button class="btn-primary" onclick="window.location.href='Signup2.html'">
+            Get Started Free <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 WAR·SIM - AI Startup War Simulator | Neural Stress-Test Engine v3.0</p>
+</footer>
+
+<script>
+    // 3D Background Animation
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let time = 0;
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+    }
+
+    function initParticles() {
+        particles = [];
+        let count = Math.min(120, Math.floor(width * height / 8000));
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.2,
+                size: Math.random() * 2 + 1,
+                color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`
+            });
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < -20) p.x = width + 20;
+            if (p.x > width + 20) p.x = -20;
+            if (p.y < -20) p.y = height + 20;
+            if (p.y > height + 20) p.y = -20;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+        
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                let dx = particles[i].x - particles[j].x;
+                let dy = particles[i].y - particles[j].y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < 100) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(72, 187, 120, ${0.12 * (1 - dist/100)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+</script>
+</body>
+</html>

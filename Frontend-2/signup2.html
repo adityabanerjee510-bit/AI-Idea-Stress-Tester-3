@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Sign Up | AI Startup War Simulator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+        background: #0a0f1a;
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+      }
+
+      #canvas-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        display: block;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(0, 40, 50, 0.3) 0%,
+          rgba(5, 15, 25, 0.85) 100%
+        );
+        z-index: -1;
+      }
+
+      /* Main Layout - Split Screen Design */
+      .auth-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* Left Side - Premium Realistic Design */
+      .brand-section {
+        flex: 0 0 calc(50% - 20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(10, 25, 30, 0.85) 0%,
+          rgba(5, 18, 22, 0.95) 100%
+        );
+        backdrop-filter: blur(15px);
+        border-right: 1px solid rgba(72, 187, 120, 0.5);
+        overflow: hidden;
+      }
+
+      /* Animated gradient orbs */
+      .brand-section::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -20%;
+        width: 80%;
+        height: 150%;
+        background: radial-gradient(
+          circle,
+          rgba(72, 187, 120, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: floatOrb 20s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .brand-section::after {
+        content: "";
+        position: absolute;
+        bottom: -30%;
+        right: -10%;
+        width: 60%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          rgba(56, 178, 172, 0.12) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: floatOrb 15s ease-in-out infinite reverse;
+        pointer-events: none;
+      }
+
+      @keyframes floatOrb {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(5%, 3%) scale(1.05);
+        }
+        66% {
+          transform: translate(-3%, 5%) scale(0.98);
+        }
+      }
+
+      /* Glowing grid overlay */
+      .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image:
+          linear-gradient(rgba(72, 187, 120, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(72, 187, 120, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+      }
+
+      .brand-content {
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+        padding: 2.5rem 3rem;
+      }
+
+      /* Premium Logo */
+      .brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 3rem;
+        position: relative;
+      }
+
+      .logo-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          rgba(72, 187, 120, 0.2),
+          rgba(56, 178, 172, 0.1)
+        );
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(72, 187, 120, 0.4);
+        backdrop-filter: blur(5px);
+      }
+
+      .brand-logo i {
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .brand-logo span {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.5px;
+      }
+
+      /* Premium Title with glow effect */
+      .brand-title {
+        font-size: 3.2rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ffffff, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -1px;
+        text-shadow: 0 0 30px rgba(72, 187, 120, 0.3);
+        position: relative;
+      }
+
+      .brand-title::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #48bb78, #38b2ac, transparent);
+        border-radius: 3px;
+      }
+
+      /* Premium Description */
+      .brand-description {
+        color: #cbd5e0;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+        font-weight: 400;
+        opacity: 0.9;
+      }
+
+      /* Stats Cards - Premium Look */
+      .stats-container {
+        display: flex;
+        gap: 1.5rem;
+        margin: 2rem 0 2rem;
+        padding: 0;
+      }
+
+      .stat-item {
+        flex: 1;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1.2rem 0.8rem;
+        border: 1px solid rgba(72, 187, 120, 0.25);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(72, 187, 120, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .stat-item:hover::before {
+        left: 100%;
+      }
+
+      .stat-item:hover {
+        transform: translateY(-5px);
+        border-color: rgba(72, 187, 120, 0.5);
+        box-shadow: 0 10px 30px rgba(72, 187, 120, 0.15);
+      }
+
+      .stat-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      /* Feature List - Premium Icons */
+      .feature-list {
+        list-style: none;
+        margin-top: 2rem;
+      }
+
+      .feature-list li {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 1rem;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(72, 187, 120, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .feature-list li:hover {
+        transform: translateX(5px);
+        border-bottom-color: rgba(72, 187, 120, 0.3);
+      }
+
+      .feature-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(
+          135deg,
+          rgba(72, 187, 120, 0.15),
+          rgba(56, 178, 172, 0.05)
+        );
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(72, 187, 120, 0.3);
+      }
+
+      .feature-list li i {
+        color: #48bb78;
+        font-size: 1rem;
+      }
+
+      /* Decorative elements */
+      .glow-dot {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #48bb78;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #48bb78;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.5;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+      }
+
+      /* Right Side - Form Section */
+      .form-section {
+        flex: 0 0 calc(50% + 20px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        overflow: hidden;
+      }
+
+      .auth-card {
+        background: rgba(15, 35, 35, 0.75);
+        backdrop-filter: blur(20px);
+        border-radius: 28px;
+        padding: 1.8rem;
+        width: 100%;
+        max-width: 540px;
+        border: 1px solid rgba(72, 187, 120, 0.4);
+        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 1.2rem;
+      }
+
+      .auth-header h2 {
+        font-size: 1.7rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff, #48bb78);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 0.3rem;
+      }
+
+      .auth-header p {
+        color: #a0aec0;
+        font-size: 0.85rem;
+      }
+
+      /* Form Styles */
+      .input-group {
+        margin-bottom: 0.9rem;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: #cbd5e0;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-wrapper i {
+        position: absolute;
+        left: 1rem;
+        color: #48bb78;
+        font-size: 0.9rem;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        background: rgba(30, 50, 55, 0.9);
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      .input-group input:focus {
+        border-color: #48bb78;
+        box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.1);
+      }
+
+      .input-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 0;
+      }
+
+      .password-strength {
+        margin-top: 0.4rem;
+        height: 4px;
+        background: rgba(72, 187, 120, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: all 0.2s ease;
+        border-radius: 2px;
+      }
+
+      .strength-text {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        color: #a0aec0;
+      }
+
+      .terms-group {
+        margin: 1rem 0;
+      }
+
+      .terms-group label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #a0aec0;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
+      .terms-group input {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #48bb78;
+      }
+
+      .terms-group a {
+        color: #48bb78;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .auth-btn {
+        width: 100%;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #48bb78, #38b2ac);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 0.3rem;
+      }
+
+      .auth-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 15px rgba(72, 187, 120, 0.3);
+      }
+
+      .social-login {
+        margin-top: 1.2rem;
+        text-align: center;
+      }
+
+      .social-login p {
+        color: #a0aec0;
+        margin-bottom: 0.8rem;
+        font-size: 0.75rem;
+        position: relative;
+      }
+
+      .social-login p::before,
+      .social-login p::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 35%;
+        height: 1px;
+        background: rgba(72, 187, 120, 0.3);
+      }
+
+      .social-login p::before {
+        left: 0;
+      }
+
+      .social-login p::after {
+        right: 0;
+      }
+
+      .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .social-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(72, 187, 120, 0.1);
+        border: 1px solid rgba(72, 187, 120, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #48bb78;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .social-icon:hover {
+        background: rgba(72, 187, 120, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .auth-footer {
+        text-align: center;
+        margin-top: 1.2rem;
+        color: #a0aec0;
+        font-size: 0.75rem;
+      }
+
+      .auth-footer a {
+        color: #48bb78;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .error-message,
+      .success-message {
+        border-radius: 10px;
+        padding: 0.6rem;
+        margin-bottom: 1rem;
+        font-size: 0.75rem;
+        display: none;
+        text-align: center;
+      }
+
+      .error-message {
+        background: rgba(220, 38, 38, 0.2);
+        border: 1px solid #ef4444;
+        color: #f87171;
+      }
+
+      .success-message {
+        background: rgba(72, 187, 120, 0.2);
+        border: 1px solid #48bb78;
+        color: #48bb78;
+      }
+
+      /* Responsive */
+      @media (max-width: 968px) {
+        .brand-section {
+          flex: 0 0 0;
+          display: none;
+        }
+
+        .form-section {
+          flex: 1;
+          padding: 1rem;
+        }
+
+        .auth-card {
+          max-width: 500px;
+        }
+      }
+
+      @media (max-height: 750px) {
+        .brand-content {
+          padding: 1.5rem 2rem;
+        }
+
+        .brand-logo {
+          margin-bottom: 1.5rem;
+        }
+
+        .brand-title {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+        }
+
+        .brand-description {
+          font-size: 0.85rem;
+          margin-bottom: 1.2rem;
+        }
+
+        .stats-container {
+          margin: 1.2rem 0;
+        }
+
+        .stat-number {
+          font-size: 1.6rem;
+        }
+
+        .feature-list {
+          margin-top: 1.2rem;
+        }
+
+        .feature-list li {
+          margin-bottom: 0.6rem;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas-bg"></canvas>
+    <div class="bg-overlay"></div>
+
+    <div class="auth-container">
+      <!-- Left Side - Premium Realistic Design -->
+      <div class="brand-section">
+        <div class="grid-overlay"></div>
+        <div class="brand-content">
+          <div class="brand-logo">
+            <div class="logo-icon-wrapper">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <span>WAR·SIM</span>
+          </div>
+          <h1 class="brand-title">Ready to<br />Dominate the<br />Market?</h1>
+          <p class="brand-description">
+            Join thousands of entrepreneurs stress-testing ideas and gaining
+            competitive advantage in the AI startup battlefield.
+          </p>
+
+          <div class="stats-container">
+            <div class="stat-item">
+              <div class="stat-number">10K+</div>
+              <div class="stat-label">ENTREPRENEURS</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">500+</div>
+              <div class="stat-label">WAR ROOMS</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">94%</div>
+              <div class="stat-label">SUCCESS RATE</div>
+            </div>
+          </div>
+
+          <ul class="feature-list">
+            <li>
+              <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              Real-time market simulation
+            </li>
+            <li>
+              <div class="feature-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+              AI-powered competitor analysis
+            </li>
+            <li>
+              <div class="feature-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              Community feedback & war rooms
+            </li>
+            <li>
+              <div class="feature-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              Battle-tested strategies
+            </li>
+          </ul>
+        </div>
+
+        <!-- Decorative glowing dots -->
+        <div class="glow-dot" style="top: 20%; left: 15%"></div>
+        <div
+          class="glow-dot"
+          style="top: 70%; left: 85%; animation-delay: 1s"
+        ></div>
+        <div
+          class="glow-dot"
+          style="top: 40%; left: 10%; animation-delay: 0.5s"
+        ></div>
+        <div
+          class="glow-dot"
+          style="top: 85%; left: 25%; animation-delay: 1.5s"
+        ></div>
+      </div>
+
+      <!-- Right Side - Form Section -->
+      <div class="form-section">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join the war room and stress-test your ideas</p>
+          </div>
+
+          <div id="errorMsg" class="error-message"></div>
+          <div id="successMsg" class="success-message"></div>
+
+          <form id="signupForm" novalidate>
+            <div class="input-row">
+              <div class="input-group">
+                <label>First Name</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-user"></i>
+                  <input
+                    type="text"
+                    id="firstName"
+                    placeholder="John"
+                    autocomplete="given-name"
+                  />
+                </div>
+              </div>
+              <div class="input-group">
+                <label>Last Name</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-user"></i>
+                  <input
+                    type="text"
+                    id="lastName"
+                    placeholder="Doe"
+                    autocomplete="family-name"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Email Address</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="hello@example.com"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Create a strong password"
+                  autocomplete="new-password"
+                />
+              </div>
+              <div class="password-strength">
+                <div class="strength-bar" id="strengthBar"></div>
+              </div>
+              <div class="strength-text" id="strengthText"></div>
+            </div>
+
+            <div class="input-group">
+              <label>Confirm Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-check-circle"></i>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="Confirm your password"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <div class="terms-group">
+              <label>
+                <input type="checkbox" id="termsCheckbox" />
+                I agree to the <a href="#" id="termsLink">Terms</a> and
+                <a href="#" id="privacyLink">Privacy</a>
+              </label>
+            </div>
+
+            <button type="submit" class="auth-btn">Create Account →</button>
+          </form>
+
+          <div class="social-login">
+            <p>Or sign up with</p>
+            <div class="social-icons">
+              <div class="social-icon" data-provider="google">
+                <i class="fab fa-google"></i>
+              </div>
+              <div class="social-icon" data-provider="github">
+                <i class="fab fa-github"></i>
+              </div>
+              <div class="social-icon" data-provider="linkedin">
+                <i class="fab fa-linkedin-in"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-footer">
+            Already have an account? <a href="Login2.html">Sign In</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ================= BACKGROUND ANIMATION ================= */
+      const canvas = document.getElementById("canvas-bg");
+      const ctx = canvas.getContext("2d");
+      let width,
+        height,
+        particles = [];
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+
+      function initParticles() {
+        particles = [];
+        let count = Math.min(80, Math.floor((width * height) / 10000));
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.2,
+            vy: (Math.random() - 0.5) * 0.15,
+            size: Math.random() * 1.8 + 0.8,
+            color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`,
+          });
+        }
+      }
+
+      function animateBackground() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < -20) p.x = width + 20;
+          if (p.x > width + 20) p.x = -20;
+          if (p.y < -20) p.y = height + 20;
+          if (p.y > height + 20) p.y = -20;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animateBackground);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      animateBackground();
+
+      /* ================= PASSWORD STRENGTH ================= */
+      const passwordInput = document.getElementById("password");
+      const strengthBar = document.getElementById("strengthBar");
+      const strengthText = document.getElementById("strengthText");
+
+      function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (password.length >= 10) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        const levels = [
+          { w: "0%", c: "#ef4444", t: "Very Weak" },
+          { w: "20%", c: "#ef4444", t: "Weak" },
+          { w: "40%", c: "#f59e0b", t: "Fair" },
+          { w: "60%", c: "#f59e0b", t: "Good" },
+          { w: "80%", c: "#48bb78", t: "Strong" },
+          { w: "100%", c: "#48bb78", t: "Very Strong" },
+        ];
+
+        return levels[Math.min(strength, 5)];
+      }
+
+      passwordInput.addEventListener("input", function () {
+        const r = checkPasswordStrength(this.value);
+        strengthBar.style.width = r.w;
+        strengthBar.style.backgroundColor = r.c;
+        strengthText.textContent = r.t;
+        strengthText.style.color = r.c;
+      });
+
+      /* ================= FORM SUBMISSION ================= */
+
+      const signupForm = document.getElementById("signupForm");
+      const errorDiv = document.getElementById("errorMsg");
+      const successDiv = document.getElementById("successMsg");
+
+      function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = "block";
+        successDiv.style.display = "none";
+      }
+
+      function showSuccess(msg) {
+        successDiv.textContent = msg;
+        successDiv.style.display = "block";
+        errorDiv.style.display = "none";
+      }
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+        const termsChecked = document.getElementById("termsCheckbox").checked;
+
+        if (!firstName || !lastName || !email || !password) {
+          return showError("Fill all fields");
+        }
+
+        if (password !== confirmPassword) {
+          return showError("Passwords do not match");
+        }
+
+        if (!termsChecked) {
+          return showError("Accept terms first");
+        }
+
+        try {
+          const res = await fetch("http://127.0.0.1:8000/signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              First_Name: firstName,
+              Last_Name: lastName,
+              Email: email,
+              Password1: password,
+              Password2: confirmPassword,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            return showError(data.detail || "Signup failed");
+          }
+
+          showSuccess("Account created!");
+
+          setTimeout(() => {
+            window.location.href = "/Login2.html";
+          }, 1200);
+        } catch (err) {
+          showError("Backend not running or error occurred");
+        }
+      });
+
+      /* ================= SOCIAL (OPTIONAL) ================= */
+      document.querySelectorAll(".social-icon").forEach((icon) => {
+        icon.addEventListener("click", () => {
+          showError("Social signup coming soon");
+        });
+      });
+    </script>
+  </body>
+</html>

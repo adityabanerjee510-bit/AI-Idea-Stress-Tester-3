@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AI Startup War Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #0a0f1a;
+            color: #eef5ff;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            display: block;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0,40,50,0.3) 0%, rgba(5,15,25,0.85) 100%);
+            z-index: -1;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(8, 20, 28, 0.8);
+            border-bottom: 1px solid rgba(72, 187, 120, 0.4);
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { filter: drop-shadow(0 0 2px #48bb78); }
+            50% { filter: drop-shadow(0 0 10px #48bb78); }
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #cbd5e0;
+            transition: 0.3s;
+            font-weight: 500;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: #48bb78;
+        }
+
+        .btn-war {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            color: white !important;
+        }
+
+        .btn-war:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-name {
+            color: #48bb78;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: rgba(72, 187, 120, 0.2);
+            border: 1px solid rgba(72, 187, 120, 0.5);
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            color: #48bb78;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(72, 187, 120, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 7rem 2rem 3rem;
+        }
+
+        /* Welcome Section */
+        .welcome-card {
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.2), rgba(56, 178, 172, 0.1));
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-card h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-card h1 span {
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .welcome-card p {
+            color: #a0aec0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(15, 35, 35, 0.5);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(72, 187, 120, 0.6);
+            background: rgba(72, 187, 120, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #48bb78;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #48bb78;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        /* Recent Tests Section */
+        .recent-tests {
+            background: rgba(15, 35, 35, 0.5);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-all {
+            color: #48bb78;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            background: rgba(72, 187, 120, 0.1);
+            transition: 0.3s;
+        }
+
+        .view-all:hover {
+            background: rgba(72, 187, 120, 0.2);
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(72, 187, 120, 0.2);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .test-item:hover {
+            background: rgba(72, 187, 120, 0.05);
+            transform: translateX(5px);
+        }
+
+        .test-info h4 {
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .test-info p {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+
+        .test-score {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .score-high {
+            color: #48bb78;
+        }
+
+        .score-mid {
+            color: #fbbf24;
+        }
+
+        .score-low {
+            color: #f87171;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #a0aec0;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #48bb78;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background: rgba(15, 35, 35, 0.5);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .profile-form {
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e0;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(30, 50, 55, 0.8);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 10px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: rgba(72, 187, 120, 0.2);
+            border: 1px solid #48bb78;
+            color: #48bb78;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #f87171;
+            color: #f87171;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .dashboard-container {
+                padding: 6rem 1rem 2rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="bg-overlay"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo" onclick="window.location.href='Dashboard.html'">
+            <i class="fas fa-microchip logo-icon"></i>
+            <span class="logo-text">WAR·SIM</span>
+        </div>
+        <div class="nav-links">
+            <a href="Dashboard.html" style="color: #48bb78;">Dashboard</a>
+            <a href="simulator.html">War Simulator</a>
+        </div>
+        <div class="user-menu">
+            <span class="user-name" id="userNameDisplay"></span>
+            <button class="logout-btn" id="logoutBtn" href="Login2.html"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <div id="welcomeSection" class="welcome-card">
+        <h1>Welcome back, <span id="welcomeName"></span>! 👋</h1>
+        <p>Ready to stress-test your next big idea? Launch the War Simulator to get started.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-flask"></i></div>
+            <div class="stat-number" id="totalTests">0</div>
+            <div class="stat-label">Total Tests Run</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-number" id="avgScore">0%</div>
+            <div class="stat-label">Average Success Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+            <div class="stat-number" id="bestScore">0%</div>
+            <div class="stat-label">Best Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-number" id="thisWeek">0</div>
+            <div class="stat-label">Tests This Week</div>
+        </div>
+    </div>
+
+    <div class="recent-tests">
+        <div class="section-header">
+            <h2><i class="fas fa-history"></i> Recent Stress Tests</h2>
+            <a href="war-simulator.html" class="view-all"><i class="fas fa-plus"></i> New Test →</a>
+        </div>
+        <div id="recentTestsList"></div>
+    </div>
+
+    <div class="profile-section">
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-user-edit"></i> Account Settings</h2>
+        
+        <div id="alertMessage" class="alert"></div>
+        
+        <div class="profile-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="userEmail" placeholder="Email" readonly style="opacity: 0.7;">
+            </div>
+            <div class="form-group">
+                <label>Company / Startup</label>
+                <input type="text" id="userCompany" placeholder="Your startup name">
+            </div>
+            <button class="btn-primary" id="updateProfileBtn"><i class="fas fa-save"></i> Update Profile</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 3D Background Animation
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let time = 0;
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+    }
+
+    function initParticles() {
+        particles = [];
+        let count = Math.min(150, Math.floor(width * height / 6000));
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2.5 + 1,
+                color: `hsl(${140 + Math.random() * 40}, 70%, 55%)`,
+                alpha: Math.random() * 0.5 + 0.3
+            });
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < -50) p.x = width + 50;
+            if (p.x > width + 50) p.x = -50;
+            if (p.y < -50) p.y = height + 50;
+            if (p.y > height + 50) p.y = -50;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = "#48bb78";
+        }
+        
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                let dx = particles[i].x - particles[j].x;
+                let dy = particles[i].y - particles[j].y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(72, 187, 120, ${0.15 * (1 - dist/120)})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+
+    // User Data Management
+    let currentUser = null;
+
+    function loadUser() {
+        const userData = localStorage.getItem('currentUser');
+        if (!userData) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        currentUser = JSON.parse(userData);
+        return true;
+    }
+
+    function saveUser() {
+        if (currentUser) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const index = users.findIndex(u => u.id === currentUser.id);
+            if (index !== -1) {
+                users[index] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+        }
+    }
+
+    function updateDashboard() {
+        if (!currentUser) return;
+        
+        document.getElementById('userNameDisplay').textContent = currentUser.name;
+        document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+        document.getElementById('fullName').value = currentUser.name;
+        document.getElementById('userEmail').value = currentUser.email;
+        document.getElementById('userCompany').value = currentUser.company || '';
+        
+        const reports = currentUser.reports || [];
+        const totalTests = reports.length;
+        const scores = reports.map(r => r.score);
+        const avgScore = totalTests > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / totalTests) : 0;
+        const bestScore = totalTests > 0 ? Math.max(...scores) : 0;
+        
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const thisWeekTests = reports.filter(r => new Date(r.date) > oneWeekAgo).length;
+        
+        document.getElementById('totalTests').textContent = totalTests;
+        document.getElementById('avgScore').textContent = avgScore + '%';
+        document.getElementById('bestScore').textContent = bestScore + '%';
+        document.getElementById('thisWeek').textContent = thisWeekTests;
+        
+        // Render recent tests
+        const recentList = document.getElementById('recentTestsList');
+        const recentTests = [...reports].reverse().slice(0, 5);
+        
+        if (recentTests.length === 0) {
+            recentList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-flask"></i>
+                    <p>No tests yet. Launch the War Simulator to stress-test your ideas!</p>
+                    <a href="war-simulator.html" class="btn-primary" style="display: inline-block; margin-top: 1rem; text-decoration: none;">Start First Test →</a>
+                </div>
+            `;
+        } else {
+            recentList.innerHTML = recentTests.map(test => `
+                <div class="test-item" onclick="viewTestDetails('${test.id}')">
+                    <div class="test-info">
+                        <h4>${test.idea.substring(0, 55)}${test.idea.length > 55 ? '...' : ''}</h4>
+                        <p><i class="far fa-calendar-alt"></i> ${new Date(test.date).toLocaleDateString()} at ${new Date(test.date).toLocaleTimeString()}</p>
+                    </div>
+                    <div class="test-score ${test.score >= 70 ? 'score-high' : (test.score >= 40 ? 'score-mid' : 'score-low')}">
+                        ${test.score}%
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById('alertMessage');
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.display = 'block';
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+        }, 3000);
+    }
+
+    window.viewTestDetails = function(testId) {
+        localStorage.setItem('viewTestId', testId);
+        window.location.href = 'war-simulator.html?view=test';
+    };
+
+    // Event Listeners
+    document.getElementById('updateProfileBtn').addEventListener('click', () => {
+        const newName = document.getElementById('fullName').value;
+        const newCompany = document.getElementById('userCompany').value;
+        
+        if (newName.trim()) {
+            currentUser.name = newName;
+            currentUser.company = newCompany;
+            saveUser();
+            updateDashboard();
+            showAlert('Profile updated successfully!', 'success');
+        }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+    });
+
+    // Initialize
+    if (loadUser()) {
+        updateDashboard();
+    }
+</script>
+</body>
+</html>
