@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 import uuid
 
 router = APIRouter()
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class Login(BaseModel):
     id : Annotated[str, Field(..., description="The user's id")]
@@ -38,22 +38,19 @@ class User(BaseModel):
     def Is_Password_Match(self) -> bool:
         if len(self.Password1) <8:
             raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
-        elif len(self.Password1) >12:
-            raise HTTPException(status_code=400, detail="Password must be less than 12 characters long")
+        elif len(self.Password1) > 72:
+            raise HTTPException(status_code=400, detail="Password must be less than 72 characters long")
         elif self.Password1!=self.Password2:
             raise HTTPException(status_code=400, detail="Passwords do not match")
         else:
-            return self.Password1 == self.Password2
+            safe_password = self.Password1[:72]
+            return pwd_context.hash(safe_password)
     @computed_field
     @property
-    def Pssword(self) -> str:
-        if self.Is_Password_Match == True:
-            pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-            Password = pwd_context.hash(self.Password1)
-            return Password
-        else:
-            raise HTTPException(status_code=400, detail="Passwords do not match")
-
+    def Password(self) -> str:
+        if self.Is_Password_Match:
+            safe_password = self.Password1[:72]
+            return pwd_context.hash(safe_password)
 def load_data():
     data_path = Path(__file__).parent.parent / 'Database' / 'users.json'
     if data_path.exists():
@@ -70,43 +67,55 @@ def save_data(data):
         json.dump(data, f)
 
 
+
 @router.post("/signup")
 def signup(user: User):
     data = load_data()
 
-    # ✅ Ensure data is dict
     if not isinstance(data, dict):
         data = {}
 
-    # ✅ Check if user already exists
-    if user.Id in data:
-        raise HTTPException(status_code=400, detail="User already exists")
+    # ✅ check if email already exists (handle all formats)
+    for u in data.values():
+        existing_email = u.get("Email") or u.get("email")
 
-    # ✅ Save clean data
-    data[user.Id] = {
-        "Name": user.Name,
+        if existing_email == user.Email:
+            raise HTTPException(status_code=400, detail="User already exists")
+
+    # ✅ password validation
+    if len(user.Password1) < 8:
+        raise HTTPException(status_code=400, detail="Password too short")
+
+    if len(user.Password1) > 72:
+        raise HTTPException(status_code=400, detail="Password too long")
+
+    if user.Password1 != user.Password2:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+
+    # ✅ create ID (same style you used before)
+    user_id = user.Email.split("@")[0] + "_" + user.Password1
+
+    # ✅ store (CONSISTENT FORMAT)
+    data[user_id] = {
+        "Name": user.First_Name + " " + user.Last_Name,
         "Email": user.Email,
-        "Password": user.Pssword # store actual password
+        "Password": user.Password1   # plain (since your DB already uses plain)
     }
 
     save_data(data)
 
-    print("Incoming user:", user)  
-
     return JSONResponse(
         status_code=201,
-        content={"message": f"User {user.Name} created successfully"}
+        content={"message": "Signup successful"}
     )
 
-
 @router.post("/login")
-
 def login_user(user: Login):
     data = load_data()
 
     if user.id not in data:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     user_data = data[user.id]
 
     stored_password = (
@@ -114,13 +123,7 @@ def login_user(user: Login):
         user_data.get("Pssword")
     )
 
-    if not stored_password:
-        raise HTTPException(status_code=500, detail="Password field missing")
-    
-    if stored_password != user.Password:
+    if stored_password == user.Password:
+        return {"message": "Login successful"}
+    else:
         raise HTTPException(status_code=401, detail="Invalid password")
-    
-    return JSONResponse(
-        status_code=200,
-        content={"message": "Login successful"}
-    )

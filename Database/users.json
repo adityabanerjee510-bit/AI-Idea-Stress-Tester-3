@@ -12,7 +12,8 @@
     "rumaben1988_adityaloveshismom": {
         "Name": "Aditya banerjee", 
         "Email": "rumaben1988@gmail.com", 
-        "Password": "adityaloveshismom"}, 
+        "Password": "adityaloveshismom"
+    }, 
     "rumaben1988_s2181.aditya.563123": {
         "Name": "Aditya banerjee", 
         "Email": "rumaben1988@gmail.com", 
@@ -22,5 +23,10 @@
         "Name": "Aditya banerjee", 
         "Email": "rumaben1988@gmail.com", 
         "Password": "12345!@#$%"
+    }, 
+    "aditya_123412345": {
+        "Name": "aditya banerjee", 
+        "Email": "aditya@gmail.com", 
+        "Password": "123412345"
     }
 }

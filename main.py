@@ -20,27 +20,3 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth")
 app.include_router(ai_router, prefix="/ai")
 
-@app.get("/")
-def read_root():
-    file_path4 = Path(__file__).resolve().parent / "Frontend-2" / "index.html"
-    return FileResponse(file_path4)
-
-@app.get("/simulator.html")
-def read_simulator():
-    file_path3 = Path(__file__).resolve().parent / "Frontend-2" / "simulator.html"
-    return FileResponse(file_path3)
-
-@app.get("/Login.html")
-def read_login():
-    file_path = Path(__file__).resolve().parent / "Frontend-2" / "Login.html"
-    return FileResponse(file_path)
-
-@app.get("/Signup.html")
-def read_signup():
-    file_path1 = Path(__file__).resolve().parent / "Frontend-2" / "signup2.html"
-    return FileResponse(file_path1)
-
-@app.get("/Dashboard.html")
-def read_dashboard():
-    file_path2 = Path(__file__).resolve().parent / "Frontend-2" / "Dashboard.html"
-    return FileResponse(file_path2)
