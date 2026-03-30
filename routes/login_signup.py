@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 import uuid
 
-router = APIRouter()
+router = APIRouter(prefix="/login_signup", tags=["Login/Signup"], responses={404: {"description": "Not found"}})
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class Login(BaseModel):
